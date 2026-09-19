@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://baagj2qg8sg1f"]
+[gd_scene load_steps=8 format=3 uid="uid://baagj2qg8sg1f"]
 
 [ext_resource type="Script" uid="uid://cfq0tyk641vpx" path="res://scripts/home.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://craolsrf4u4lu" path="res://assets/images/Tiles/Large tiles/Thick outline/tile_0000.png" id="2_tile"]
@@ -6,50 +6,50 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_panel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
-content_margin_left = 14.0
-content_margin_top = 10.0
-content_margin_right = 14.0
-content_margin_bottom = 10.0
 bg_color = Color(0.25, 0.18, 0.11, 0.9)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
 content_margin_left = 14.0
 content_margin_top = 10.0
 content_margin_right = 14.0
 content_margin_bottom = 10.0
-bg_color = Color(0.18, 0.12, 0.07, 0.95)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
-content_margin_left = 14.0
-content_margin_top = 10.0
-content_margin_right = 14.0
-content_margin_bottom = 10.0
 bg_color = Color(0.38, 0.27, 0.16, 0.95)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_disabled"]
 content_margin_left = 14.0
 content_margin_top = 10.0
 content_margin_right = 14.0
 content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+bg_color = Color(0.18, 0.12, 0.07, 0.95)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_disabled"]
 bg_color = Color(0.3, 0.25, 0.19, 0.65)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
 
-[node name="Home" type="Control" unique_id=856755537]
+[node name="Home" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -58,7 +58,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="NinePatchRect" parent="." unique_id=1953111487]
+[node name="Background" type="NinePatchRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -70,8 +70,9 @@ patch_margin_left = 10
 patch_margin_top = 10
 patch_margin_right = 10
 patch_margin_bottom = 10
+mouse_filter = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=318452026]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -83,11 +84,11 @@ offset_bottom = -40.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="MarginContainer" unique_id=2000425519]
+[node name="Panel" type="Panel" parent="MarginContainer"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 
-[node name="Content" type="VBoxContainer" parent="MarginContainer/Panel" unique_id=1254279421]
+[node name="Content" type="VBoxContainer" parent="MarginContainer/Panel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -100,14 +101,14 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 18
 
-[node name="QuestionIndex" type="Label" parent="MarginContainer/Panel/Content" unique_id=1796323329]
+[node name="QuestionIndex" type="Label" parent="MarginContainer/Panel/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.18, 0.11, 1)
 theme_override_font_sizes/font_size = 20
 text = "Pergunta 1 de 3"
 horizontal_alignment = 1
 
-[node name="QuestionText" type="RichTextLabel" parent="MarginContainer/Panel/Content" unique_id=175595673]
+[node name="QuestionText" type="RichTextLabel" parent="MarginContainer/Panel/Content"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/default_color = Color(0.2, 0.14, 0.08, 1)
@@ -117,60 +118,16 @@ text = "Pergunta"
 fit_content = true
 scroll_active = false
 
-[node name="OptionsContainer" type="VBoxContainer" parent="MarginContainer/Panel/Content" unique_id=824258813]
+[node name="OptionsContainer" type="VBoxContainer" parent="MarginContainer/Panel/Content"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Option1" type="Button" parent="MarginContainer/Panel/Content/OptionsContainer" unique_id=1448414089]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.94, 0.82, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 0.95, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-text = "Opção 1"
-
-[node name="Option2" type="Button" parent="MarginContainer/Panel/Content/OptionsContainer" unique_id=1904300965]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.94, 0.82, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 0.95, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-text = "Opção 2"
-
-[node name="Option3" type="Button" parent="MarginContainer/Panel/Content/OptionsContainer" unique_id=1722307708]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.94, 0.82, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 0.95, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-text = "Opção 3"
-
-[node name="Option4" type="Button" parent="MarginContainer/Panel/Content/OptionsContainer" unique_id=549220086]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.94, 0.82, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 0.95, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-text = "Opção 4"
-
-[node name="Feedback" type="Label" parent="MarginContainer/Panel/Content" unique_id=674778196]
+[node name="Feedback" type="Label" parent="MarginContainer/Panel/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.18, 0.11, 1)
 autowrap_mode = 3
 
-[node name="NextButton" type="Button" parent="MarginContainer/Panel/Content" unique_id=528126760]
+[node name="NextButton" type="Button" parent="MarginContainer/Panel/Content"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 4

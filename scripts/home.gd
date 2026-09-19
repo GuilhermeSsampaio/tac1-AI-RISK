@@ -1,171 +1,166 @@
 extends Control
 
+const CASE_LOADER_SCRIPT = preload("res://scripts/case_loader.gd")
+
 @onready var question_index: Label = $MarginContainer/Panel/Content/QuestionIndex
 @onready var question_text: RichTextLabel = $MarginContainer/Panel/Content/QuestionText
+@onready var options_container: VBoxContainer = $MarginContainer/Panel/Content/OptionsContainer
 @onready var feedback_label: Label = $MarginContainer/Panel/Content/Feedback
 @onready var next_button: Button = $MarginContainer/Panel/Content/NextButton
-@onready var option_buttons: Array[Button] = [
-    $MarginContainer/Panel/Content/OptionsContainer/Option1,
-    $MarginContainer/Panel/Content/OptionsContainer/Option2,
-    $MarginContainer/Panel/Content/OptionsContainer/Option3,
-    $MarginContainer/Panel/Content/OptionsContainer/Option4,
-]
+
+enum GameState { DECISION, FEEDBACK, RESULT }
 
 var questions: Array = []
 var current_index: int = 0
-var answered: bool = false
-var is_final_result: bool = false
+var state: GameState = GameState.DECISION
+var option_buttons: Array[Button] = []
 
 var score: Dictionary = {
-    "dependencia": 0,
-    "delegacao_cognitiva": 0,
-    "autonomia": 0,
-    "pensamento_critico": 0,
-    "uso_responsavel": 0,
+	"dependencia": 0,
+	"delegacao_cognitiva": 0,
+	"autonomia": 0,
+	"pensamento_critico": 0,
+	"uso_responsavel": 0,
 }
 
 func _ready() -> void:
-    _connect_options()
-    load_questions()
-    show_question()
-
-func _connect_options() -> void:
-    for i in range(option_buttons.size()):
-        option_buttons[i].pressed.connect(_on_option_pressed.bind(i))
-    next_button.pressed.connect(_on_next_button_pressed)
+	next_button.pressed.connect(_on_next_button_pressed)
+	load_questions()
+	if questions.is_empty():
+		_show_load_error()
+	else:
+		show_question()
 
 func load_questions() -> void:
-    var file: FileAccess = FileAccess.open("res://data/questions.json", FileAccess.READ)
-    if file == null:
-        questions = [
-            {
-                "text": "Você precisa entregar um trabalho importante e a IA oferece um texto pronto em segundos. O que fazer?",
-                "options": [
-                    {"text": "Copiar inteiro sem revisar", "weights": {"dependencia": 4, "delegacao_cognitiva": 5, "autonomia": -2}},
-                    {"text": "Usar a IA para estruturar e depois estudar o conteúdo", "weights": {"autonomia": 2, "uso_responsavel": 3, "pensamento_critico": 2}},
-                    {"text": "Pedir para a IA fazer a redação e só entregar", "weights": {"dependencia": 5, "delegacao_cognitiva": 6, "autonomia": -3}},
-                    {"text": "Consultar a IA como apoio e comparar com fontes confiáveis", "weights": {"uso_responsavel": 4, "pensamento_critico": 3, "autonomia": 2}}
-                ],
-                "moral": "Delegar todo o raciocínio pode reduzir a própria aprendizagem."
-            },
-            {
-                "text": "Seu professor pede uma explicação de um conceito complexo. Você vê uma resposta da IA bem convincente, mas sem fonte. O que faz?",
-                "options": [
-                    {"text": "Entregar sem verificar", "weights": {"dependencia": 3, "pensamento_critico": -2, "uso_responsavel": -2}},
-                    {"text": "Verificar a informação em fontes confiáveis", "weights": {"pensamento_critico": 4, "uso_responsavel": 4, "autonomia": 2}},
-                    {"text": "Aceitar porque a IA parece inteligente", "weights": {"dependencia": 2, "delegacao_cognitiva": 3, "pensamento_critico": -3}},
-                    {"text": "Pedir à IA para listar dúvidas e depois pesquisar", "weights": {"uso_responsavel": 3, "autonomia": 2, "pensamento_critico": 2}}
-                ],
-                "moral": "A IA pode gerar respostas plausíveis, mas a checagem continua sendo responsabilidade humana."
-            },
-            {
-                "text": "Você precisa resolver um problema de lógica, mas a IA já oferece a solução pronta. Qual é a melhor decisão?",
-                "options": [
-                    {"text": "Entregar a solução pronta sem entender", "weights": {"dependencia": 4, "delegacao_cognitiva": 5, "autonomia": -3}},
-                    {"text": "Usar a IA só para pistas e tentar resolver sozinho", "weights": {"autonomia": 4, "pensamento_critico": 4, "uso_responsavel": 3}},
-                    {"text": "Pedir a IA para fazer tudo e aprender depois", "weights": {"dependencia": 5, "delegacao_cognitiva": 5, "autonomia": -3}},
-                    {"text": "Comparar a resposta da IA com seu próprio raciocínio", "weights": {"pensamento_critico": 4, "uso_responsavel": 4, "autonomia": 3}}
-                ],
-                "moral": "A aprendizagem real acontece quando você exercita o pensamento, não quando só recebe a resposta."
-            }
-        ]
-        return
-
-    var data = JSON.parse_string(file.get_as_text())
-    if typeof(data) == TYPE_ARRAY:
-        questions = data
+	questions = CASE_LOADER_SCRIPT.new().load_cases("res://data/questions.json")
 
 func show_question() -> void:
-    if current_index >= questions.size():
-        show_final_result()
-        return
+	if current_index >= questions.size():
+		show_final_result()
+		return
 
-    is_final_result = false
-    answered = false
-    var question = questions[current_index]
-    question_index.text = "Pergunta %d de %d" % [current_index + 1, questions.size()]
-    question_text.text = question.get("text", "Pergunta")
-    feedback_label.text = ""
-    next_button.visible = false
+	state = GameState.DECISION
+	var question = questions[current_index]
+	question_index.text = "Pergunta %d de %d" % [current_index + 1, questions.size()]
+	question_text.text = question.get("text", "Pergunta")
+	feedback_label.text = ""
+	next_button.visible = false
+	_clear_option_buttons()
 
-    var options = question.get("options", [])
-    for i in range(option_buttons.size()):
-        if i < options.size():
-            option_buttons[i].text = options[i].get("text", "Opção")
-            option_buttons[i].visible = true
-            option_buttons[i].disabled = false
-        else:
-            option_buttons[i].visible = false
-            option_buttons[i].disabled = true
+	var options = question.get("options", [])
+	for index in range(options.size()):
+		var button := Button.new()
+		button.text = options[index].get("text", "Opção")
+		button.custom_minimum_size = Vector2(0, 46)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 16)
+		_style_option_button(button)
+		button.pressed.connect(_on_option_pressed.bind(index))
+		options_container.add_child(button)
+		option_buttons.append(button)
 
 func _on_option_pressed(index: int) -> void:
-    if answered:
-        return
+	if state != GameState.DECISION:
+		return
 
-    answered = true
-    var question = questions[current_index]
-    var option = question.get("options", [])[index]
+	state = GameState.FEEDBACK
+	var question = questions[current_index]
+	var option = question.get("options", [])[index]
 
-    for key in score.keys():
-        score[key] += int(option.get("weights", {}).get(key, 0))
+	for key in score.keys():
+		score[key] += int(option.get("weights", {}).get(key, 0))
 
-    feedback_label.text = "Você escolheu: %s\n\n%s" % [option.get("text", "Opção"), question.get("moral", "")]
-    next_button.visible = true
-    next_button.text = "Próxima pergunta" if current_index < questions.size() - 1 else "Ver resultado"
+	feedback_label.text = "Você escolheu: %s\n\n%s" % [option.get("text", "Opção"), question.get("moral", "")]
+	next_button.visible = true
+	next_button.text = "Próxima pergunta" if current_index < questions.size() - 1 else "Ver resultado"
 
-    for button in option_buttons:
-        button.disabled = true
+	for button in option_buttons:
+		button.disabled = true
 
 func _on_next_button_pressed() -> void:
-    if is_final_result:
-        restart_game()
-        return
+	if state == GameState.RESULT:
+		restart_game()
+		return
 
-    if current_index < questions.size() - 1:
-        current_index += 1
-        show_question()
-        return
+	if state != GameState.FEEDBACK:
+		return
 
-    show_final_result()
+	if current_index < questions.size() - 1:
+		current_index += 1
+		show_question()
+		return
+
+	show_final_result()
 
 func show_final_result() -> void:
-    is_final_result = true
-    answered = true
+	state = GameState.RESULT
 
-    question_index.text = "Resultado final"
-    question_text.text = "Seu perfil mostra tendência a: %s" % _generate_profile_summary()
-    feedback_label.text = (
-        "Dependência de IA: %d\n" +
-        "Delegação cognitiva: %d\n" +
-        "Autonomia: %d\n" +
-        "Pensamento crítico: %d\n" +
-        "Uso responsável: %d\n\n" +
+	question_index.text = "Resultado final"
+	question_text.text = "Seu perfil mostra tendência a: %s" % _generate_profile_summary()
+	feedback_label.text = (
+		"Dependência de IA: %d\n" +
+		"Delegação cognitiva: %d\n" +
+		"Autonomia: %d\n" +
+		"Pensamento crítico: %d\n" +
+		"Uso responsável: %d\n\n" +
         "Aviso: este resultado é uma simulação comportamental e não substitui diagnóstico profissional."
-    ) % [
-        score["dependencia"],
-        score["delegacao_cognitiva"],
-        score["autonomia"],
-        score["pensamento_critico"],
-        score["uso_responsavel"],
-    ]
+	) % [
+		score["dependencia"],
+		score["delegacao_cognitiva"],
+		score["autonomia"],
+		score["pensamento_critico"],
+		score["uso_responsavel"],
+	]
 
-    for button in option_buttons:
-        button.visible = false
+	_clear_option_buttons()
 
-    next_button.visible = true
-    next_button.text = "Jogar novamente"
+	next_button.visible = true
+	next_button.text = "Jogar novamente"
 
 func _generate_profile_summary() -> String:
-    if score["dependencia"] >= 7 and score["autonomia"] <= 1:
-        return "alto uso dependente da IA."
-    if score["uso_responsavel"] >= 7 and score["pensamento_critico"] >= 5:
-        return "uso responsável e crítico da IA."
-    if score["delegacao_cognitiva"] >= 8:
-        return "delegação excessiva do raciocínio para a máquina."
-    return "equilíbrio entre uso e autonomia, com espaço para melhorar."
+	if score["dependencia"] >= 7 and score["autonomia"] <= 1:
+		return "alto uso dependente da IA."
+	if score["uso_responsavel"] >= 7 and score["pensamento_critico"] >= 5:
+		return "uso responsável e crítico da IA."
+	if score["delegacao_cognitiva"] >= 8:
+		return "delegação excessiva do raciocínio para a máquina."
+	return "equilíbrio entre uso e autonomia, com espaço para melhorar."
 
 func restart_game() -> void:
-    current_index = 0
-    for key in score.keys():
-        score[key] = 0
-    show_question()
+	current_index = 0
+	for key in score.keys():
+		score[key] = 0
+	show_question()
+
+func _clear_option_buttons() -> void:
+	for button in option_buttons:
+		button.queue_free()
+	option_buttons.clear()
+
+func _show_load_error() -> void:
+	state = GameState.RESULT
+	question_index.text = "Nao foi possivel carregar os casos"
+	question_text.text = "Verifique o arquivo data/questions.json."
+	feedback_label.text = "O jogo nao pode iniciar com dados invalidos."
+	next_button.visible = false
+
+func _style_option_button(button: Button) -> void:
+	button.add_theme_color_override("font_color", Color(1, 0.94, 0.82, 1))
+	button.add_theme_color_override("font_hover_color", Color(1, 1, 0.95, 1))
+	button.add_theme_stylebox_override("normal", _make_button_style(Color(0.25, 0.18, 0.11, 0.9)))
+	button.add_theme_stylebox_override("hover", _make_button_style(Color(0.38, 0.27, 0.16, 0.95)))
+	button.add_theme_stylebox_override("pressed", _make_button_style(Color(0.18, 0.12, 0.07, 0.95)))
+	button.add_theme_stylebox_override("disabled", _make_button_style(Color(0.3, 0.25, 0.19, 0.65)))
+
+func _make_button_style(background_color: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = background_color
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_right = 4
+	style.corner_radius_bottom_left = 4
+	style.content_margin_left = 14.0
+	style.content_margin_top = 10.0
+	style.content_margin_right = 14.0
+	style.content_margin_bottom = 10.0
+	return style
